@@ -78,28 +78,34 @@ public abstract class DebeziumSource extends KafkaConnectSource {
     public abstract void setDbConnectorTask(Map<String, Object> config) throws Exception;
 
     public abstract void setDbConnectorClass(Map<String, Object> config) throws Exception;
-    
+
+    // Translates a configuration property from a source key to a target key if the target is missing.
+    private static void mapPropertyIfAbsent(Map<String, Object> config, String sourceKey, String targetKey,
+                                            String logMessage) {
+        if (config.containsKey(sourceKey) && !config.containsKey(targetKey)) {
+            config.put(targetKey, config.get(sourceKey));
+            log.warn(logMessage);
+        }
+    }
+
     public static void applyConfigMappings(Map<String, Object> config) {
-        // Translate database.server.name to topic.prefix (Debezium 1.x -> 2.x
-        if (config.containsKey("database.server.name") && !config.containsKey("topic.prefix")) {
-            config.put("topic.prefix", config.get("database.server.name"));
-            log.warn("Property 'database.server.name' is deprecated in Debezium 2.x. Auto-mapped to 'topic.prefix'.");
-        }
-        // Translate topic.prefix back to database.server.name (For internal validator compatibility)
-        if (config.containsKey("topic.prefix") && !config.containsKey("database.server.name")) {
-            config.put("database.server.name", config.get("topic.prefix"));
-            log.warn("Auto-mapped 'topic.prefix' to 'database.server.name' for internal validator compatibility.");
-        }
+        // Forward mappings (Debezium 1.x -> 2.x)
+        // Translate database.server.name to topic.prefix
+        mapPropertyIfAbsent(config, "database.server.name", "topic.prefix",
+                "Property 'database.server.name' is deprecated in Debezium 2.x. Auto-mapped to 'topic.prefix'.");
+
         // Translate table.whitelist to table.include.list
-        if (config.containsKey("table.whitelist") && !config.containsKey("table.include.list")) {
-            config.put("table.include.list", config.get("table.whitelist"));
-            log.warn("Property 'table.whitelist' is deprecated in Debezium 2.x. Auto-mapped to 'table.include.list'.");
-        }
+        mapPropertyIfAbsent(config, "table.whitelist", "table.include.list",
+                "Property 'table.whitelist' is deprecated in Debezium 2.x. Auto-mapped to 'table.include.list'.");
+
         // Translate schema.whitelist to schema.include.list
-        if (config.containsKey("schema.whitelist") && !config.containsKey("schema.include.list")) {
-            config.put("schema.include.list", config.get("schema.whitelist"));
-            log.warn("Property 'schema.whitelist' is deprecated in Debezium 2.x. Auto-mapped to 'schema.include.list'.");
-        }
+        mapPropertyIfAbsent(config, "schema.whitelist", "schema.include.list",
+                "Property 'schema.whitelist' is deprecated in Debezium 2.x. Auto-mapped to 'schema.include.list'.");
+
+        // Backward mapping (Debezium 2.x -> 1.x)
+        // Translate topic.prefix back to database.server.name (For internal validator compatibility)
+        mapPropertyIfAbsent(config, "topic.prefix", "database.server.name",
+                "Auto-mapped 'topic.prefix' to 'database.server.name' for internal validator compatibility.");
     }
 
     @Override

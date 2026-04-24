@@ -37,7 +37,7 @@ public class DebeziumSourceTest {
         DebeziumSource.applyConfigMappings(config);
 
         assertEquals(config.get("database.server.name"), "dbserver1",
-            "database.server.name should be auto-mapped from topic.prefix");
+                "database.server.name should be auto-mapped from topic.prefix");
     }
 
     @Test
@@ -49,7 +49,7 @@ public class DebeziumSourceTest {
         DebeziumSource.applyConfigMappings(config);
 
         assertEquals(config.get("topic.prefix"), "dbserver1",
-            "topic.prefix should be auto-mapped from database.server.name");
+                "topic.prefix should be auto-mapped from database.server.name");
     }
 
     @Test
@@ -60,7 +60,7 @@ public class DebeziumSourceTest {
         DebeziumSource.applyConfigMappings(config);
 
         assertEquals(config.get("table.include.list"), "public.users",
-            "table.include.list should be auto-mapped from table.whitelist");
+                "table.include.list should be auto-mapped from table.whitelist");
     }
 
     @Test
@@ -71,7 +71,7 @@ public class DebeziumSourceTest {
         DebeziumSource.applyConfigMappings(config);
 
         assertEquals(config.get("schema.include.list"), "public",
-            "schema.include.list should be auto-mapped from schema.whitelist");
+                "schema.include.list should be auto-mapped from schema.whitelist");
     }
 
     @Test
